@@ -1,8 +1,8 @@
 {
-  "name": "awsmeetupgroup-api",
+  "name": "awsmeetupgroup-app",
   "version": "1.0.0",
-  "description": "",
-  "main": "graphql.js",
+  "description": "Graphql API",
+  "main": "index.js",
   "scripts": {
     "start": "nodemon",
     "build": "tsc -p ./",
@@ -12,15 +12,18 @@
   "keywords": [],
   "author": "awsmeetupgroup",
   "license": "ISC",
-  "dependencies": {
-    "apollo-server": "^3.0.2",
-    "apollo-server-lambda": "^3.0.2",
-    "typeorm": "^0.2.36"
-  },
   "devDependencies": {
-    "@types/aws-lambda": "^8.10.80",
-    "@types/graphql": "^14.5.0",
+    "@types/aws-lambda": "^8.10.81",
+    "nodemon": "^2.0.12",
     "prettier": "^2.3.2",
     "ts-node": "^10.1.0"
+  },
+  "dependencies": {
+    "apollo-server": "^3.1.2",
+    "apollo-server-lambda": "^3.1.2",
+    "dotenv": "^8.6.0",
+    "pg": "^8.7.1",
+    "reflect-metadata": "^0.1.13",
+    "typeorm": "^0.2.30"
   }
 }
