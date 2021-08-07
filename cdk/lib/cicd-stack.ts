@@ -71,7 +71,7 @@ export class PipelineStack extends Stack {
       owner: githubOwner,
       repo: githubRepo,
       branch: githubBranch,
-      oauthToken: SecretValue.secretsManager("github_token"),
+      oauthToken: SecretValue.secretsManager("github-token"),
       output: sourceOutput,
     });
 
