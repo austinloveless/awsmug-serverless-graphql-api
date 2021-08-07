@@ -21,8 +21,8 @@ export class RDSStack extends Stack {
   readonly rdsDatabaseOutput: CfnOutput;
   readonly secret: ISecret;
   readonly postgresRDSInstance: DatabaseInstance;
-  readonly rdsDbUser: string = process.env.TYPEORM_USERNAME || "";
-  readonly rdsDbName: string = process.env.TYPEORM_DATABASE || "";
+  readonly rdsDbUser: string = process.env.TYPEORM_USERNAME || "awsmeetupgroup";
+  readonly rdsDbName: string = process.env.TYPEORM_DATABASE || "awsmeetupgroup";
   readonly rdsPort: number = 5432;
 
   constructor(scope: App, id: string, props: RDSStackProps) {

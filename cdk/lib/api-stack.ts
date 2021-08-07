@@ -32,7 +32,7 @@ export class GraphqlApiStack extends Stack {
 
     this.handler = new Function(this, "graphql", {
       runtime: Runtime.NODEJS_14_X,
-      code: Code.fromAsset(path.join(__dirname, "../../app")),
+      code: Code.fromAsset("app"),
       handler: "/build/src/graphql.handler",
       vpc: props.vpc,
       vpcSubnets: {
@@ -43,12 +43,13 @@ export class GraphqlApiStack extends Stack {
         "inboundDbAccessSecurityGroup" + "rdsLambda",
         props.inboundDbAccessSecurityGroup
       ),
+
       environment: {
-        TYPEORM_USERNAME: props.rdsDbUser,
-        TYPEORM_HOST: props.rdsEndpoint,
-        TYPEORM_DATABASE: props.rdsDbName,
-        TYPEORM_PORT: props.rdsPort.toString(),
-        TYPEORM_PASSWORD: this.secret.secretValue.toString(),
+        TYPEORM_URL: `postgres://${
+          props.rdsDbUser
+        }:${this.secret.secretValue.toString()}@${props.rdsEndpoint}:${
+          props.rdsPort
+        }/${props.rdsDbName}`,
         TYPEORM_SYNCHRONIZE: "true",
         TYPEORM_LOGGING: "true",
         TYPEORM_ENTITIES: "./build/src/entity/*.entity.js",

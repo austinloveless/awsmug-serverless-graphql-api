@@ -33,6 +33,4 @@ new GraphqlApiStack(app, "APIStack", {
   rdsPasswordSecretArn: rdsPasswordSecretArn,
 });
 
-new PipelineStack(app, "PipelineStack", {
-  rdsPasswordSecretArn: rdsPasswordSecretArn,
-});
+new PipelineStack(app, "PipelineStack");

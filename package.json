@@ -2,7 +2,7 @@
   "name": "api",
   "version": "0.1.0",
   "bin": {
-    "app": "bin/app.js"
+    "app": "cdk/bin/app.ts"
   },
   "scripts": {
     "build": "tsc",
@@ -22,6 +22,9 @@
   },
   "dependencies": {
     "@aws-cdk/aws-apigateway": "^1.115.0",
+    "@aws-cdk/aws-codebuild": "^1.117.0",
+    "@aws-cdk/aws-codepipeline": "^1.117.0",
+    "@aws-cdk/aws-codepipeline-actions": "^1.117.0",
     "@aws-cdk/aws-ec2": "^1.115.0",
     "@aws-cdk/aws-lambda": "^1.115.0",
     "@aws-cdk/aws-rds": "^1.115.0",
