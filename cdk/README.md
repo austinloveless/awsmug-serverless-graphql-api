@@ -1,4 +1,4 @@
-# AWSMEETUPGROUP Serverless Graphql API
+# CDK Coded Infrastructure
 
 ## Getting started
 

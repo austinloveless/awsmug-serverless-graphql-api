@@ -1,5 +1,5 @@
-# CDK Coded Infrastructure
+# AWSMEETUPGROUP Serverless Graphql API
 
-## Useful commands
+## Global install
 
 `npm install -g typeorm ts-node`
