@@ -1,5 +1,5 @@
 require("dotenv").config();
-import { App, Stack, StackProps } from "@aws-cdk/core";
+import { App, Stack, StackProps, CfnOutput } from "@aws-cdk/core";
 import {
   DatabaseInstance,
   DatabaseInstanceEngine,
@@ -12,20 +12,24 @@ import { SecurityGroup, SubnetType, Vpc } from "@aws-cdk/aws-ec2";
 export interface RDSStackProps extends StackProps {
   vpc: Vpc;
   securityGroup: SecurityGroup;
+  rdsPasswordSecretArn: string;
 }
 
 export class RDSStack extends Stack {
+  readonly rdsEndpointOutput: CfnOutput;
+  readonly rdsUsernameOutput: CfnOutput;
+  readonly rdsDatabaseOutput: CfnOutput;
   readonly secret: ISecret;
   readonly postgresRDSInstance: DatabaseInstance;
-  readonly rdsDbUser: string = process.env.TYPEORM_USERNAME || "serverless";
-  readonly rdsDbName: string = process.env.TYPEORM_DATABASE || "awsmeetupgroup";
+  readonly rdsDbUser: string = process.env.TYPEORM_USERNAME || "";
+  readonly rdsDbName: string = process.env.TYPEORM_DATABASE || "";
   readonly rdsPort: number = 5432;
 
   constructor(scope: App, id: string, props: RDSStackProps) {
     super(scope, id, props);
 
     this.secret = Secret.fromSecretAttributes(this, "rdsPassword", {
-      secretArn: `arn:aws:secretsmanager:${process.env.CDK_DEFAULT_REGION}:${process.env.CDK_DEFAULT_ACCOUNT}:secret:rdsPassword-3Eir69`,
+      secretArn: props.rdsPasswordSecretArn,
     });
 
     this.postgresRDSInstance = new DatabaseInstance(
@@ -50,5 +54,19 @@ export class RDSStack extends Stack {
         port: this.rdsPort,
       }
     );
+    this.rdsEndpointOutput = new CfnOutput(this, "rdsEndpoint", {
+      value: this.postgresRDSInstance.instanceEndpoint.socketAddress,
+      description: "Endpoint to access RDS instance",
+    });
+
+    this.rdsUsernameOutput = new CfnOutput(this, "rdsUsername", {
+      value: this.rdsDbUser,
+      description: "Root user of RDS instance",
+    });
+
+    this.rdsDatabaseOutput = new CfnOutput(this, "rdsDatabase", {
+      value: this.rdsDbName,
+      description: "Default database of RDS instance",
+    });
   }
 }

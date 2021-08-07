@@ -1,9 +1,10 @@
 require("dotenv").config();
-import { Stack, StackProps, Construct } from "@aws-cdk/core";
-import { LambdaRestApi } from "@aws-cdk/aws-apigateway";
+import { Stack, StackProps, Construct, CfnOutput } from "@aws-cdk/core";
+import { LambdaRestApi, ResourceBase, RestApi } from "@aws-cdk/aws-apigateway";
 import { Function, Runtime, Code } from "@aws-cdk/aws-lambda";
 import { Vpc, SecurityGroup, SubnetType } from "@aws-cdk/aws-ec2";
-import { Secret } from "@aws-cdk/aws-secretsmanager";
+import { ISecret, Secret } from "@aws-cdk/aws-secretsmanager";
+import * as path from "path";
 
 export interface LambdaStackProps extends StackProps {
   vpc: Vpc;
@@ -12,20 +13,27 @@ export interface LambdaStackProps extends StackProps {
   rdsDbUser: string;
   rdsDbName: string;
   rdsPort: number;
+  rdsPasswordSecretArn: string;
 }
 
 export class GraphqlApiStack extends Stack {
+  readonly handler: any;
+  readonly secret: ISecret;
+  readonly api: RestApi;
+  readonly apiPathOutput: CfnOutput;
+  readonly graphql: ResourceBase;
+
   constructor(scope: Construct, id: string, props: LambdaStackProps) {
     super(scope, id, props);
 
-    const secret = Secret.fromSecretAttributes(this, "rdsPassword", {
-      secretArn: `arn:aws:secretsmanager:${process.env.CDK_DEFAULT_REGION}:${process.env.CDK_DEFAULT_ACCOUNT}:secret:rdsPassword-3Eir69`,
+    this.secret = Secret.fromSecretAttributes(this, "rdsPassword", {
+      secretArn: props.rdsPasswordSecretArn,
     });
 
-    const handler = new Function(this, "graphql", {
+    this.handler = new Function(this, "graphql", {
       runtime: Runtime.NODEJS_14_X,
-      code: Code.fromAsset("api"),
-      handler: "build/src/graphql.handler",
+      code: Code.fromAsset(path.join(__dirname, "../../app")),
+      handler: "/build/src/graphql.handler",
       vpc: props.vpc,
       vpcSubnets: {
         subnetType: SubnetType.ISOLATED,
@@ -40,19 +48,24 @@ export class GraphqlApiStack extends Stack {
         TYPEORM_HOST: props.rdsEndpoint,
         TYPEORM_DATABASE: props.rdsDbName,
         TYPEORM_PORT: props.rdsPort.toString(),
-        TYPEORM_PASSWORD: secret.secretValue.toString(),
+        TYPEORM_PASSWORD: this.secret.secretValue.toString(),
         TYPEORM_SYNCHRONIZE: "true",
         TYPEORM_LOGGING: "true",
         TYPEORM_ENTITIES: "./build/src/entity/*.entity.js",
       },
     });
 
-    const api = new LambdaRestApi(this, "graphql-api", {
-      handler,
+    this.api = new LambdaRestApi(this, "graphql-api", {
+      handler: this.handler,
       proxy: false,
     });
 
-    const graphql = api.root.addResource("graphql");
-    graphql.addMethod("ANY");
+    this.graphql = this.api.root.addResource("graphql");
+    this.graphql.addMethod("ANY");
+
+    this.apiPathOutput = new CfnOutput(this, "apiPath", {
+      value: this.api.root.path,
+      description: "Path of the API",
+    });
   }
 }
