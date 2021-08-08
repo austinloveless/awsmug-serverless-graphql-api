@@ -1,4 +1,6 @@
-# CDK Coded Infrastructure
+# Serverless Graphql API
+
+Graphql API running on AWS Lambda in a custom VPC with RDS Postgres as a data source. All infrastructure is managed by the AWS CDK.
 
 ## Getting started
 
