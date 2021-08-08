@@ -1,46 +1,39 @@
-import { CfnOutput, Construct, Stack, SecretValue } from "@aws-cdk/core";
+require("dotenv").config();
+import { CfnOutput, Construct, Stack, StackProps } from "@aws-cdk/core";
 import { Artifact, Pipeline } from "@aws-cdk/aws-codepipeline";
 import {
   CodeBuildAction,
   GitHubSourceAction,
 } from "@aws-cdk/aws-codepipeline-actions";
-import {
-  BuildSpec,
-  EventAction,
-  FilterGroup,
-  LinuxBuildImage,
-  Project,
-  Source,
-} from "@aws-cdk/aws-codebuild";
+import { BuildSpec, LinuxBuildImage, Project } from "@aws-cdk/aws-codebuild";
+import { ISecret, Secret } from "@aws-cdk/aws-secretsmanager";
 
-const githubOwner = process.env.GITHUB_ORG || "austinloveless";
+const githubOwner = process.env.GITHUB_OWNER || "austinloveless";
 const githubRepo = process.env.GITHUB_REPO || "awsmug-serverless-graphql-api";
 const githubBranch = process.env.GITHUB_BRANCH || "master";
 
+export interface PipelineStackProps extends StackProps {
+  githubWebhookToken: string;
+}
+
 export class PipelineStack extends Stack {
   readonly pipeline: Pipeline;
-
   readonly apiPath: CfnOutput;
   readonly rdsEndpoint: CfnOutput;
   readonly rdsUsername: CfnOutput;
   readonly rdsDatabase: CfnOutput;
+  readonly secret: ISecret;
 
-  constructor(scope: Construct, id: string, props?: {}) {
+  constructor(scope: Construct, id: string, props: PipelineStackProps) {
     super(scope, id, props);
 
-    const gitHubSource = Source.gitHub({
-      owner: githubOwner,
-      repo: githubRepo,
-      webhook: true,
-      webhookFilters: [
-        FilterGroup.inEventOf(EventAction.PUSH).andBranchIs("main"),
-      ],
+    this.secret = Secret.fromSecretAttributes(this, "rdsPassword", {
+      secretArn: props.githubWebhookToken,
     });
 
     // CODEBUILD - project
-    const project = new Project(this, "MyProject", {
+    const project = new Project(this, "CodeBuildProject", {
       projectName: `${this.stackName}`,
-      source: gitHubSource,
       environment: {
         buildImage: LinuxBuildImage.AMAZON_LINUX_2_2,
         privileged: true,
@@ -50,11 +43,8 @@ export class PipelineStack extends Stack {
         phases: {
           build: {
             commands: [
-              "cd app",
               "npm ci",
-              "npm run build",
-              "cd ../",
-              "npm ci",
+              "npm run build:app",
               "npm run cdk deploy APIStack",
             ],
           },
@@ -71,7 +61,7 @@ export class PipelineStack extends Stack {
       owner: githubOwner,
       repo: githubRepo,
       branch: githubBranch,
-      oauthToken: SecretValue.secretsManager("github-token"),
+      oauthToken: this.secret.secretValue,
       output: sourceOutput,
     });
 

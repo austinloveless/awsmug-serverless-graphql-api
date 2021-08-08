@@ -1,10 +1,8 @@
-require("dotenv").config();
 import { Stack, StackProps, Construct, CfnOutput } from "@aws-cdk/core";
 import { LambdaRestApi, ResourceBase, RestApi } from "@aws-cdk/aws-apigateway";
 import { Function, Runtime, Code } from "@aws-cdk/aws-lambda";
 import { Vpc, SecurityGroup, SubnetType } from "@aws-cdk/aws-ec2";
 import { ISecret, Secret } from "@aws-cdk/aws-secretsmanager";
-import * as path from "path";
 
 export interface LambdaStackProps extends StackProps {
   vpc: Vpc;
@@ -33,7 +31,7 @@ export class GraphqlApiStack extends Stack {
     this.handler = new Function(this, "graphql", {
       runtime: Runtime.NODEJS_14_X,
       code: Code.fromAsset("app"),
-      handler: "/build/src/graphql.handler",
+      handler: "build/src/graphql.handler",
       vpc: props.vpc,
       vpcSubnets: {
         subnetType: SubnetType.ISOLATED,

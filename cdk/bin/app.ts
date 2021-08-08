@@ -1,7 +1,6 @@
 #!/usr/bin/env node
-require("dotenv").config();
 import "source-map-support/register";
-import { Stage, App, Aws } from "@aws-cdk/core";
+import { App, Aws } from "@aws-cdk/core";
 
 import { GraphqlApiStack } from "../lib/api-stack";
 import { VpcStack } from "../lib/vpc-stack";
@@ -10,6 +9,7 @@ import { PipelineStack } from "../lib/cicd-stack";
 
 const app = new App();
 const rdsPasswordSecretArn = `arn:aws:secretsmanager:${Aws.REGION}:${Aws.ACCOUNT_ID}:secret:rdsPassword-3Eir69`;
+const githubWebhookToken = `arn:aws:secretsmanager:${Aws.REGION}:${Aws.ACCOUNT_ID}:secret:github-token-mlglil`;
 
 const vpcStack = new VpcStack(app, "VPCStack");
 
@@ -33,4 +33,6 @@ new GraphqlApiStack(app, "APIStack", {
   rdsPasswordSecretArn: rdsPasswordSecretArn,
 });
 
-new PipelineStack(app, "PipelineStack");
+new PipelineStack(app, "PipelineStack", {
+  githubWebhookToken,
+});

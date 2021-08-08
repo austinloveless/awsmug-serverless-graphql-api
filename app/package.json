@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "start": "nodemon",
-    "build": "tsc -p ./",
+    "build": "rimraf build/ && tsc -p ./",
     "db:setup": "bin/db_setup",
     "db:seed": "bin/db_seed"
   },
@@ -16,7 +16,9 @@
     "@types/aws-lambda": "^8.10.81",
     "nodemon": "^2.0.12",
     "prettier": "^2.3.2",
-    "ts-node": "^10.1.0"
+    "rimraf": "^3.0.2",
+    "ts-node": "^10.1.0",
+    "typescript": "^4.3.5"
   },
   "dependencies": {
     "apollo-server": "^3.1.2",
