@@ -42,11 +42,7 @@ export class PipelineStack extends Stack {
         version: "0.2",
         phases: {
           build: {
-            commands: [
-              "npm ci",
-              "npm run build:app",
-              "npm run cdk deploy APIStack",
-            ],
+            commands: ["npm ci", "npm run build:app", "npm run cdk synth"],
           },
         },
       }),
