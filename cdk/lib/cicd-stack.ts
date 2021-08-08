@@ -7,6 +7,7 @@ import {
 } from "@aws-cdk/aws-codepipeline-actions";
 import { BuildSpec, LinuxBuildImage, Project } from "@aws-cdk/aws-codebuild";
 import { ISecret, Secret } from "@aws-cdk/aws-secretsmanager";
+import { ManagedPolicy, Role, ServicePrincipal } from "@aws-cdk/aws-iam";
 
 const githubOwner = process.env.GITHUB_OWNER || "austinloveless";
 const githubRepo = process.env.GITHUB_REPO || "awsmug-serverless-graphql-api";
@@ -23,6 +24,7 @@ export class PipelineStack extends Stack {
   readonly rdsUsername: CfnOutput;
   readonly rdsDatabase: CfnOutput;
   readonly secret: ISecret;
+  readonly codeBuildRole: Role;
 
   constructor(scope: Construct, id: string, props: PipelineStackProps) {
     super(scope, id, props);
@@ -34,6 +36,7 @@ export class PipelineStack extends Stack {
     // CODEBUILD - project
     const project = new Project(this, "CodeBuildProject", {
       projectName: `${this.stackName}`,
+      role: this.codeBuildRole,
       environment: {
         buildImage: LinuxBuildImage.AMAZON_LINUX_2_2,
         privileged: true,
@@ -69,7 +72,6 @@ export class PipelineStack extends Stack {
     });
 
     // PIPELINE STAGES
-
     this.pipeline = new Pipeline(this, "APIPipeline", {
       stages: [
         {
@@ -80,6 +82,15 @@ export class PipelineStack extends Stack {
           stageName: "Build",
           actions: [buildAction],
         },
+      ],
+    });
+
+    // 👇 Create Role Admin Access for demo purposes
+    this.codeBuildRole = new Role(this, "CodeBuildAdminAccess", {
+      assumedBy: new ServicePrincipal("codebuild.amazonaws.com"),
+      description: "CodeBuild Admin Access Role",
+      managedPolicies: [
+        ManagedPolicy.fromAwsManagedPolicyName("AdministratorAccess"),
       ],
     });
   }
