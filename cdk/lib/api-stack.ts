@@ -11,7 +11,6 @@ export interface LambdaStackProps extends StackProps {
   rdsDbUser: string;
   rdsDbName: string;
   rdsPort: number;
-  rdsPasswordSecretArn: string;
 }
 
 export class GraphqlApiStack extends Stack {

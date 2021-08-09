@@ -12,7 +12,6 @@ import { SecurityGroup, SubnetType, Vpc } from "@aws-cdk/aws-ec2";
 export interface RDSStackProps extends StackProps {
   vpc: Vpc;
   securityGroup: SecurityGroup;
-  rdsPasswordSecretArn: string;
 }
 
 export class RDSStack extends Stack {

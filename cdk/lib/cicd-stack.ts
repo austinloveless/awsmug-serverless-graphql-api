@@ -13,10 +13,6 @@ const githubOwner = process.env.GITHUB_OWNER || "austinloveless";
 const githubRepo = process.env.GITHUB_REPO || "awsmug-serverless-graphql-api";
 const githubBranch = process.env.GITHUB_BRANCH || "master";
 
-export interface PipelineStackProps extends StackProps {
-  githubWebhookToken: string;
-}
-
 export class PipelineStack extends Stack {
   readonly pipeline: Pipeline;
   readonly apiPath: CfnOutput;
@@ -26,7 +22,7 @@ export class PipelineStack extends Stack {
   readonly githubSecret: ISecret;
   readonly codeBuildRole: Role;
 
-  constructor(scope: Construct, id: string, props: PipelineStackProps) {
+  constructor(scope: Construct, id: string, props?: {}) {
     super(scope, id, props);
 
     this.githubSecret = Secret.fromSecretNameV2(
@@ -38,11 +34,11 @@ export class PipelineStack extends Stack {
     // CODEBUILD - project
     const project = new Project(this, "CodeBuildProject", {
       projectName: `${this.stackName}`,
-      role: this.codeBuildRole,
       environment: {
         buildImage: LinuxBuildImage.AMAZON_LINUX_2_2,
         privileged: true,
       },
+      role: this.codeBuildRole,
       buildSpec: BuildSpec.fromObject({
         version: "0.2",
         phases: {
@@ -50,7 +46,7 @@ export class PipelineStack extends Stack {
             commands: [
               "npm ci",
               "npm run build:app",
-              "npx cdk deploy APIStack, VPCStack, RDSStack --require-approval never",
+              "npx cdk deploy --all --require-approval never",
             ],
           },
         },
@@ -80,6 +76,7 @@ export class PipelineStack extends Stack {
 
     // PIPELINE STAGES
     this.pipeline = new Pipeline(this, "APIPipeline", {
+      role: this.codeBuildRole,
       stages: [
         {
           stageName: "Source",

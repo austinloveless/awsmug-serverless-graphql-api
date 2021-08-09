@@ -46,11 +46,9 @@ aws secretsmanager create-secret --name github-token --description "Secret for G
 
 1. Build the App to compile it from TS to JS. `npm run build:app`
 
-2. Update /cdk/bin `` const rdsPasswordSecretArn = `arn:aws:secretsmanager:${Aws.REGION}:${Aws.ACCOUNT_ID}:secret:rdsPassword-CHANGEME `` to your rdsPassword SecretArn that was saved in the above steps.
+2. Deploy all stacks `cdk deploy PipelineStack` The PipelineStack will deploy the other resources for you. (set `--profile YOURPROFILE` if you haven't ran `export AWS_PROFILE=YOUR_PROFILE`)
 
-3. Update /cdk/bin `` const githubWebhookToken = `arn:aws:secretsmanager:${Aws.REGION}:${Aws.ACCOUNT_ID}:secret:github-token-CHANGEME `` to your github-token SecretArn that was saved in the above steps.
-
-4. Deploy all stacks `cdk deploy --all` (set `--profile YOURPROFILE` if you haven't ran `export AWS_PROFILE=YOUR_PROFILE`)
+3. (optional) Deploy all stacks `cdk deploy --all`
 
 **Note:**
 You can also deploy single stacks at a time with `cdk deploy STACKNAME`
