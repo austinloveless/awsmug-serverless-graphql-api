@@ -23,15 +23,17 @@ export class PipelineStack extends Stack {
   readonly rdsEndpoint: CfnOutput;
   readonly rdsUsername: CfnOutput;
   readonly rdsDatabase: CfnOutput;
-  readonly secret: ISecret;
+  readonly githubSecret: ISecret;
   readonly codeBuildRole: Role;
 
   constructor(scope: Construct, id: string, props: PipelineStackProps) {
     super(scope, id, props);
 
-    this.secret = Secret.fromSecretAttributes(this, "rdsPassword", {
-      secretArn: props.githubWebhookToken,
-    });
+    this.githubSecret = Secret.fromSecretNameV2(
+      this,
+      "githubToken",
+      "github-token"
+    );
 
     // CODEBUILD - project
     const project = new Project(this, "CodeBuildProject", {
@@ -45,7 +47,11 @@ export class PipelineStack extends Stack {
         version: "0.2",
         phases: {
           build: {
-            commands: ["npm ci", "npm run build:app", "npm run cdk synth"],
+            commands: [
+              "npm ci",
+              "npm run build:app",
+              "npx cdk deploy APIStack, VPCStack, RDSStack --require-approval never",
+            ],
           },
         },
       }),
@@ -60,11 +66,12 @@ export class PipelineStack extends Stack {
       owner: githubOwner,
       repo: githubRepo,
       branch: githubBranch,
-      oauthToken: this.secret.secretValue,
+      oauthToken: this.githubSecret.secretValue,
       output: sourceOutput,
     });
 
     const buildAction = new CodeBuildAction({
+      role: this.codeBuildRole,
       actionName: "CodeBuild",
       project: project,
       input: sourceOutput,

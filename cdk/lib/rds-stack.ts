@@ -19,7 +19,7 @@ export class RDSStack extends Stack {
   readonly rdsEndpointOutput: CfnOutput;
   readonly rdsUsernameOutput: CfnOutput;
   readonly rdsDatabaseOutput: CfnOutput;
-  readonly secret: ISecret;
+  readonly rdsPassword: ISecret;
   readonly postgresRDSInstance: DatabaseInstance;
   readonly rdsDbUser: string = process.env.TYPEORM_USERNAME || "awsmeetupgroup";
   readonly rdsDbName: string = process.env.TYPEORM_DATABASE || "awsmeetupgroup";
@@ -28,9 +28,11 @@ export class RDSStack extends Stack {
   constructor(scope: App, id: string, props: RDSStackProps) {
     super(scope, id, props);
 
-    this.secret = Secret.fromSecretAttributes(this, "rdsPassword", {
-      secretArn: props.rdsPasswordSecretArn,
-    });
+    this.rdsPassword = Secret.fromSecretNameV2(
+      this,
+      "rdsPassword",
+      "rdsPassword"
+    );
 
     this.postgresRDSInstance = new DatabaseInstance(
       this,
@@ -42,7 +44,7 @@ export class RDSStack extends Stack {
         vpc: props.vpc,
         credentials: {
           username: this.rdsDbUser,
-          password: this.secret.secretValue,
+          password: this.rdsPassword.secretValue,
         },
         securityGroups: [props.securityGroup],
         vpcPlacement: { subnetType: SubnetType.ISOLATED },

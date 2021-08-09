@@ -16,7 +16,7 @@ export interface LambdaStackProps extends StackProps {
 
 export class GraphqlApiStack extends Stack {
   readonly handler: any;
-  readonly secret: ISecret;
+  readonly rdsPassword: ISecret;
   readonly api: RestApi;
   readonly apiPathOutput: CfnOutput;
   readonly graphql: ResourceBase;
@@ -24,9 +24,11 @@ export class GraphqlApiStack extends Stack {
   constructor(scope: Construct, id: string, props: LambdaStackProps) {
     super(scope, id, props);
 
-    this.secret = Secret.fromSecretAttributes(this, "rdsPassword", {
-      secretArn: props.rdsPasswordSecretArn,
-    });
+    this.rdsPassword = Secret.fromSecretNameV2(
+      this,
+      "rdsPassword",
+      "rdsPassword"
+    );
 
     this.handler = new Function(this, "graphql", {
       runtime: Runtime.NODEJS_14_X,
@@ -45,7 +47,7 @@ export class GraphqlApiStack extends Stack {
       environment: {
         TYPEORM_URL: `postgres://${
           props.rdsDbUser
-        }:${this.secret.secretValue.toString()}@${props.rdsEndpoint}:${
+        }:${this.rdsPassword.secretValue.toString()}@${props.rdsEndpoint}:${
           props.rdsPort
         }/${props.rdsDbName}`,
         TYPEORM_SYNCHRONIZE: "true",
