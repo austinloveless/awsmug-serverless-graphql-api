@@ -40,7 +40,7 @@ After that save token in SecretsManger as a secure string
 aws secretsmanager create-secret --name github-token --description "Secret for GitHub" --secret-string "GITHUB_PERSONAL_ACCESS_TOKEN" >> githubTokenARN.txt
 ```
 
-5. Create a .env file `cp .env.example .env`
+5. Create a .env file `cp .env.example .env` and update the `GITHUB_OWNER` variable to fit your GitHub username.
 
 ## Deploy Stack
 
