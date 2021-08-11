@@ -53,6 +53,10 @@ aws secretsmanager create-secret --name github-token --description "Secret for G
 **Note:**
 You can also deploy single stacks at a time with `cdk deploy STACKNAME`
 
+### **Note**
+
+Currently there is a bug with the Service Role on CodeBuild and needs to be manually updated.
+
 ## Useful commands
 
 - `npm run build` compile typescript to js
