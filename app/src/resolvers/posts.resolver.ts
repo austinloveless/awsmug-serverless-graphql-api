@@ -9,6 +9,7 @@ export const resolvers = {
       const { id } = args;
       return await Posts.findOne({ id });
     },
+    hello: () => 'hello world',
   },
   Mutation: {
     addPost: async (_: any, args: any) => {
