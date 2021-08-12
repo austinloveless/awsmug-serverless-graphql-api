@@ -57,6 +57,10 @@ You can also deploy single stacks at a time with `cdk deploy STACKNAME`
 
 Currently there is a bug with the Service Role on CodeBuild and needs to be manually updated.
 
+## Delete the Application and all Stacks
+
+`cdk destroy --all`
+
 ## Useful commands
 
 - `npm run build` compile typescript to js
