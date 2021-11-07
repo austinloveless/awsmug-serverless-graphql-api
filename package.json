@@ -4,7 +4,7 @@
   "bin": {
     "app": "cdk/bin/app.js"
   },
-  { "license": "MIT"},
+  "license": "MIT",
   "scripts": {
     "build": "tsc",
     "watch": "tsc -w",
